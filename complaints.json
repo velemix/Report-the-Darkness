@@ -1,0 +1,42 @@
+[
+    {
+        "complaint": "Broken streetlight",
+        "ai_result": "Category: Public Infrastructure & Utilities\nPriority: Medium\nSuggested action: Dispatch barangay maintenance or the local electrician to inspect the streetlight; if it is barangay-maintained, replace the bulb or repair wiring; if managed by the local electric cooperative or city engineering office, report the exact pole number/location to them for replacement."
+    },
+    {
+        "complaint": "fallen tree",
+        "ai_result": "**Category:** Public Safety / Environmental Hazard  \n**Priority:** High  \n**Suggested action:** Dispatch barangay responders/tanods immediately to cordon off the area, check for damaged power lines or injured persons, and coordinate with the local Disaster Risk Reduction and Management Office (BDRRMO/CDRRMO) or CENRO for rapid tree-clearing operations."
+    },
+    {
+        "complaint": "Lack of streetlights",
+        "ai_result": "**Category:** Infrastructure / Public Safety  \n**Priority:** Medium  \n**Suggested action:** Conduct an ocular inspection of the reported area to map out dark spots, coordinate with the Municipal/City Engineering Office or local electric cooperative, and schedule the procurement and installation of streetlights (such as LED or solar-powered lights)."
+    },
+    {
+        "complaint": "Brokent streetlight",
+        "ai_result": "Category: Public Infrastructure / Utilities\nPriority: Medium\nSuggested action: Dispatch a barangay maintenance personnel to inspect the exact location and pole number, then coordinate with the Municipal/City Engineering Office or local electric utility provider to replace the bulb or repair the fixture."
+    },
+    {
+        "complaint": "Broken streetlight",
+        "ai_result": "Category: Infrastructure / Public Safety\nPriority: Medium\nSuggested action: Dispatch a barangay maintenance personnel to inspect the reported location, replace the bulb or fixture if minor, or coordinate with the local electric utility/City Engineering Office for necessary technical repairs."
+    },
+    {
+        "complaint": "Pedestrians not following stop lights",
+        "ai_result": "**Category:** Traffic Management and Public Safety  \n**Priority:** Medium  \n**Suggested action:** Deploy Barangay Public Safety Officers (BPSO/Tanods) to monitor the intersection during peak hours to guide pedestrians and deter jaywalking. Coordinate with the city/municipal traffic enforcement office to conduct an anti-jaywalking campaign and install visible pedestrian safety signage or barriers if needed."
+    },
+    {
+        "complaint": "Dim lighting from streetlights",
+        "ai_result": "**Category:** Public Infrastructure / Public Safety (Street Lighting Maintenance)  \n**Priority:** Medium  \n**Suggested action:** Dispatch barangay maintenance personnel to inspect the reported location, replace defective or low-wattage bulbs with proper LED lights, and coordinate with the local electric utility or City/Municipal Engineering Office if electrical wiring or fixture replacement is required."
+    },
+    {
+        "complaint": "Potholes",
+        "ai_result": "Category: Infrastructure / Public Works (Road Maintenance)\nPriority: Medium\nSuggested action: Conduct an on-site inspection, install temporary warning markers or cones to prevent accidents, and endorse the request to the Barangay Maintenance Committee or City/Municipal Engineering Office for asphalt patching or road repair."
+    },
+    {
+        "complaint": "Broken Streetlight",
+        "ai_result": "**Category:** Public Infrastructure / Utilities  \n**Priority:** Medium  \n**Suggested action:** Dispatch a barangay maintenance staff or tanod to verify the exact pole location and inspect the damage, then coordinate with the City/Municipal Engineering Office or the local electric utility provider for repair or bulb replacement."
+    },
+    {
+        "complaint": "Lack of streetlights",
+        "ai_result": "**Category:** Infrastructure / Public Safety  \n**Priority:** Medium  \n**Suggested action:** Conduct an ocular inspection to identify the specific dark areas, coordinate with the City/Municipal Engineering Office or local electric utility for installation or repairs, and allocate funds in the Barangay Annual Investment Plan for adequate street lighting."
+    }
+]
