@@ -1199,19 +1199,28 @@
         }
 
         document.addEventListener("DOMContentLoaded", () => {
-
             const form = document.getElementById("complaintForm");
             const resultDisplay = document.getElementById("result");
+            const recordBtn = document.getElementById("recordBtn");
+            const stopBtn = document.getElementById("stopBtn");
+
+            let mediaRecorder;
+            let audioChunks = [];
 
             if (form) {
                 form.addEventListener("submit", async (event) => {
                     event.preventDefault();
 
                     const complaintInput = document.getElementById("complaintInput");
-                    const complaint = complaintInput ? complaintInput.value : "";
+                    const complaint = complaintInput ? complaintInput.value.trim() : "";
+
+                    if (!complaint) {
+                        if (resultDisplay) resultDisplay.textContent = "Complaint cannot be empty!";
+                        return;
+                    }
 
                     if (resultDisplay) {
-                        resultDisplay.textContent = "Analyzing complaint...";
+                        resultDisplay.textContent = "Analyzing text complaint...";
                     }
 
                     try {
@@ -1238,12 +1247,74 @@
                 });
             }
 
+            // 2. Handle Voice Recording
+            if (recordBtn && stopBtn) {
+                recordBtn.addEventListener("click", async () => {
+                    audioChunks = [];
+                    try {
+                        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                        mediaRecorder = new MediaRecorder(stream);
+
+                        mediaRecorder.ondataavailable = (event) => {
+                            audioChunks.push(event.data);
+                        };
+
+                        mediaRecorder.onstop = async () => {
+                            if (resultDisplay) {
+                                resultDisplay.textContent = "Processing voice recording with AI...";
+                            }
+                            
+                            const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                            const formData = new FormData();
+                            formData.append('audio', audioBlob, 'voice_complaint.webm');
+
+                            try {
+                                const response = await fetch('/complaint', {
+                                    method: 'POST',
+                                    body: formData
+                                });
+
+                                const result = await response.json();
+                                if (resultDisplay) {
+                                    resultDisplay.textContent = result.result;
+                                }
+                            } catch (error) {
+                                if (resultDisplay) {
+                                    resultDisplay.textContent = "An error occurred while uploading your voice recording.";
+                                }
+                            }
+                        };
+
+                        mediaRecorder.start();
+                        recordBtn.disabled = true;
+                        stopBtn.disabled = false;
+                        if (resultDisplay) {
+                            resultDisplay.textContent = "Recording voice... Speak now into your microphone.";
+                        }
+                    } catch (err) {
+                        console.error("Microphone access denied or not supported:", err);
+                        if (resultDisplay) {
+                            resultDisplay.textContent = "Microphone access denied or not supported by your browser.";
+                        }
+                    }
+                });
+
+                stopBtn.addEventListener("click", () => {
+                    if (mediaRecorder && mediaRecorder.state !== "inactive") {
+                        mediaRecorder.stop();
+                        mediaRecorder.stream.getTracks().forEach(track => track.stop());
+                    }
+                    recordBtn.disabled = false;
+                    stopBtn.disabled = true;
+                });
+            }
+
+            // Navbar Scroll Effects
             const navbar = document.querySelector(".navbar");
             const sections = document.querySelectorAll("section");
             const navLinks = document.querySelectorAll(".nav-Link");
 
             window.addEventListener("scroll", () => {
-
                 if (window.scrollY > 50) {
                     navbar?.classList.add("scrolled");
                 } else {
@@ -1274,9 +1345,7 @@
                         link.classList.add("active");
                     }
                 });
-
             });
-
         });
     </script>
 <script src="{{ url_for('static', filename='external.js') }}"></script>
