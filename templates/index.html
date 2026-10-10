@@ -1062,7 +1062,7 @@
 
     </section>
 
-    <section id="complaint">
+   <section id="complaint">
 
         <div class="complaint-container">
 
@@ -1083,18 +1083,27 @@
             <form id="complaintForm" class="complaint-form">
 
                 <label for="complaintInput">
-                    Describe the streetlight issue
+                    Describe the streetlight issue or record your voice
                 </label>
 
                 <textarea
                     id="complaintInput"
                     name="complaint"
-                    required
+                    placeholder="Type your complaint here or use the microphone buttons below..."
                 ></textarea>
 
                 <button type="submit" class="complaint-button">
-                    Submit Complaint →
+                    Submit Text Complaint →
                 </button>
+
+                <div class="voice-controls">
+                    <button type="button" id="recordBtn" class="complaint-button" style="background: rgba(76, 175, 80, 0.15); border-color: rgba(76, 175, 80, 0.4); color: #81c784;">
+                        🎤 Record Voice
+                    </button>
+                    <button type="button" id="stopBtn" class="complaint-button" style="background: rgba(244, 67, 54, 0.15); border-color: rgba(244, 67, 54, 0.4); color: #e57373;" disabled>
+                        ⏹️ Stop & Send
+                    </button>
+                </div>
 
             </form>
 
