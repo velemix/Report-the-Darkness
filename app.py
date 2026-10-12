@@ -38,24 +38,23 @@ def home():
 
 @app.route("/complaint", methods=["POST"])
 def classify_complaint():
+    # 1. Handle Audio Files directly via Part.from_bytes
     if 'audio' in request.files:
         audio_file = request.files['audio']
-        temp_path = "temp_audio.webm"
-        audio_file.save(temp_path)
+        audio_bytes = audio_file.read()
         
-        if os.path.getsize(temp_path) == 0:
-            if os.path.exists(temp_path):
-                os.remove(temp_path)
+        if not audio_bytes:
             return jsonify({"result": "Audio recording is empty!"}), 400
             
         try:
-            uploaded_file = client.files.upload(file=temp_path)
-            
             response = client.models.generate_content(
                 model="gemini-3.8-flash",
                 contents=[
                     "Listen to this barangay complaint voice recording, transcribe it, and classify it.",
-                    uploaded_file
+                    types.Part.from_bytes(
+                        data=audio_bytes,
+                        mime_type='audio/webm', 
+                    )
                 ],
                 config=types.GenerateContentConfig(
                     system_instruction="Provide the transcription of the audio followed by:\nCategory:\nPriority:\nSuggested action:"
@@ -63,23 +62,15 @@ def classify_complaint():
             )
             ai_output = response.text
             save_to_file("[Voice Recording]", ai_output)
-            
-            if os.path.exists(temp_path):
-                os.remove(temp_path)
-                
             return jsonify({"result": ai_output})
             
-        except ServerError:
-            if os.path.exists(temp_path):
-                os.remove(temp_path)
-            return jsonify({
-                "result": "The AI server is experiencing high traffic right now. Please wait a few seconds and try submitting again."
-            }), 503
         except Exception as e:
-            if os.path.exists(temp_path):
-                os.remove(temp_path)
-            return jsonify({"result": f"Error processing voice: {str(e)}"}), 500
+            print(f"Audio processing error details: {e}")
+            return jsonify({
+                "result": f"Error processing audio: {str(e)}"
+            }), 500
 
+    # 2. Handle Text Files or Standard Text Input
     if 'file' in request.files:
         text_file = request.files['file']
         complaint_text = text_file.read().decode('utf-8')
@@ -109,12 +100,6 @@ Suggested action:
         save_to_file(complaint_text, ai_output)
         return jsonify({"result": ai_output})
         
-    except ServerError:
-        return jsonify({
-            "result": "The AI server is experiencing high traffic right now. Please wait a few seconds and try submitting again."
-        }), 503
     except Exception as e:
+        print(f"Text processing error details: {e}")
         return jsonify({"result": f"Error processing text: {str(e)}"}), 500
-
-if __name__ == "__main__":
-    app.run(debug=True)
