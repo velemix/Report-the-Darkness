@@ -40,20 +40,22 @@ def home():
 def classify_complaint():
     if 'audio' in request.files:
         audio_file = request.files['audio']
-        audio_bytes = audio_file.read()
+        temp_path = "temp_audio.webm"
+        audio_file.save(temp_path)
         
-        if not audio_bytes:
+        if os.path.getsize(temp_path) == 0:
+            if os.path.exists(temp_path):
+                os.remove(temp_path)
             return jsonify({"result": "Audio recording is empty!"}), 400
             
         try:
+            uploaded_file = client.files.upload(file=temp_path)
+            
             response = client.models.generate_content(
                 model="gemini-3.8-flash",
                 contents=[
                     "Listen to this barangay complaint voice recording, transcribe it, and classify it.",
-                    types.Part.from_bytes(
-                        data=audio_bytes,
-                        mime_type='audio/webm', 
-                    )
+                    uploaded_file
                 ],
                 config=types.GenerateContentConfig(
                     system_instruction="Provide the transcription of the audio followed by:\nCategory:\nPriority:\nSuggested action:"
@@ -61,15 +63,30 @@ def classify_complaint():
             )
             ai_output = response.text
             save_to_file("[Voice Recording]", ai_output)
+            
+            if os.path.exists(temp_path):
+                os.remove(temp_path)
+                
             return jsonify({"result": ai_output})
             
         except ServerError:
+            if os.path.exists(temp_path):
+                os.remove(temp_path)
             return jsonify({
                 "result": "The AI server is experiencing high traffic right now. Please wait a few seconds and try submitting again."
             }), 503
+        except Exception as e:
+            if os.path.exists(temp_path):
+                os.remove(temp_path)
+            return jsonify({"result": f"Error processing voice: {str(e)}"}), 500
 
-    data = request.json or {}
-    complaint_text = data.get("complaint", "")
+    if 'file' in request.files:
+        text_file = request.files['file']
+        complaint_text = text_file.read().decode('utf-8')
+    else:
+        data = request.json or {}
+        complaint_text = data.get("complaint", "") or request.form.get("complaint", "")
+
     if not complaint_text:
         return jsonify({"result": "Complaint cannot be empty!"}), 400
 
@@ -90,12 +107,14 @@ Suggested action:
         )
         ai_output = response.text
         save_to_file(complaint_text, ai_output)
-        return jsonify({"result": response.text})
+        return jsonify({"result": ai_output})
         
     except ServerError:
         return jsonify({
             "result": "The AI server is experiencing high traffic right now. Please wait a few seconds and try submitting again."
         }), 503
+    except Exception as e:
+        return jsonify({"result": f"Error processing text: {str(e)}"}), 500
 
 if __name__ == "__main__":
     app.run(debug=True)
