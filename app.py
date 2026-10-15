@@ -79,13 +79,12 @@ def classify_complaint():
             print(f"Audio processing error details: {e}")
             return jsonify({"result": f"Error processing audio: {str(e)}"}), 500
 
-    # 2. Handle Text Files or Standard Text Input
+    
     if 'file' in request.files:
         text_file = request.files['file']
         complaint_text = text_file.read().decode('utf-8')
     else:
-        data = request.json or {}
-        complaint_text = data.get("complaint", "") or request.form.get("complaint", "")
+        complaint_text = request.form.get("complaint", "")
 
     if not complaint_text:
         return jsonify({"result": "Complaint cannot be empty!"}), 400
