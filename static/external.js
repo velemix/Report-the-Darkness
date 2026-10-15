@@ -4,22 +4,53 @@ const resultElement = document.getElementById('result');
 let mediaRecorder;
 let audioChunks = [];
 
+function sendWithLocation(formData, successMessage) {
+    resultElement.textContent = "Fetching location and processing...";
+
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            async (position) => {
+                formData.append('latitude', position.coords.latitude);
+                formData.append('longitude', position.coords.longitude);
+                await postToServer(formData, successMessage);
+            },
+            async (error) => {
+                console.warn("Location permission denied or unavailable:", error.message);
+                formData.append('latitude', 'Unknown');
+                formData.append('longitude', 'Unknown');
+                await postToServer(formData, successMessage);
+            }
+        );
+    } else {
+        formData.append('latitude', 'Unknown');
+        formData.append('longitude', 'Unknown');
+        postToServer(formData, successMessage);
+    }
+}
+
+async function postToServer(formData, successMessage) {
+    try {
+        resultElement.textContent = successMessage;
+        const response = await fetch('/complaint', {
+            method: 'POST',
+            body: formData 
+        });
+        const result = await response.json();
+        resultElement.textContent = result.result;
+    } catch (err) {
+        console.error("Error submitting to server:", err);
+        resultElement.textContent = "Error communicating with server.";
+    }
+}
+
 form.addEventListener('submit', async (event) => {
     event.preventDefault();
-    const complaint = document.getElementById('complaintInput').value;
+    const complaintText = document.getElementById('complaintInput').value;
 
-    resultElement.textContent = "Processing text complaint...";
+    const formData = new FormData();
+    formData.append('complaint', complaintText);
 
-    const response = await fetch('/complaint', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ complaint })
-    });
-
-    const result = await response.json();
-    resultElement.textContent = result.result;
+    sendWithLocation(formData, "Processing text complaint with AI...");
 });
 
 const recordBtn = document.getElementById('recordBtn');
@@ -37,19 +68,11 @@ if (recordBtn && stopBtn) {
             };
 
             mediaRecorder.onstop = async () => {
-                resultElement.textContent = "Processing voice recording with AI...";
-                
                 const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
                 const formData = new FormData();
                 formData.append('audio', audioBlob, 'voice_complaint.webm');
 
-                const response = await fetch('/complaint', {
-                    method: 'POST',
-                    body: formData 
-                });
-
-                const result = await response.json();
-                resultElement.textContent = result.result;
+                sendWithLocation(formData, "Processing voice recording with AI...");
             };
 
             mediaRecorder.start();

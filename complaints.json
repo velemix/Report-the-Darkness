@@ -38,5 +38,15 @@
     {
         "complaint": "Lack of streetlights",
         "ai_result": "**Category:** Infrastructure / Public Safety  \n**Priority:** Medium  \n**Suggested action:** Conduct an ocular inspection to identify the specific dark areas, coordinate with the City/Municipal Engineering Office or local electric utility for installation or repairs, and allocate funds in the Barangay Annual Investment Plan for adequate street lighting."
+    },
+    {
+        "complaint": "Barangay Tejeros - Streetlights are not opening at night",
+        "ai_result": "Category: Infrastructure / Public Utilities (Street Lighting)  \nPriority: Medium  \nSuggested action: Dispatch a barangay maintenance team to inspect the area for faulty bulbs or circuit breaker issues, report the defective units to the City Engineering Office or electric utility provider for replacement/repair, and deploy Barangay Tanods for roving night patrols in the affected streets until lighting is restored.",
+        "location": "Location not shared"
+    },
+    {
+        "complaint": "barangay Hagdan bato itaas - Streetlights are dim",
+        "ai_result": "Category: Public Works and Infrastructure (Street Lighting)  \nPriority: Medium  \nSuggested action: Conduct an on-site inspection of the affected streetlights, verify if bulbs or solar panels need cleaning or replacement, and coordinate with the City Engineering Office or local electric utility (e.g., Meralco) to repair or upgrade to brighter LED fixtures for public safety.",
+        "location": "Location not shared"
     }
 ]
