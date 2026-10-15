@@ -33,12 +33,29 @@ async function postToServer(formData, successMessage) {
         resultElement.textContent = successMessage;
         const response = await fetch('/complaint', {
             method: 'POST',
-            body: formData 
+            body: formData
         });
-        const result = await response.json();
+
+        // Check if the server returned an error status (like 415, 500, 404)
+        const textResponse = await response.text();
+        let result;
+        try {
+            result = JSON.parse(textResponse);
+        } catch (e) {
+            // If it's not JSON, it's an HTML error page from Flask
+            console.error("Server HTML Error Response:", textResponse);
+            resultElement.textContent = `Server Error (${response.status}): Check terminal logs.`;
+            return;
+        }
+
+        if (!response.ok) {
+            resultElement.textContent = result.result || "Error processing request.";
+            return;
+        }
+
         resultElement.textContent = result.result;
     } catch (err) {
-        console.error("Error submitting to server:", err);
+        console.error("Network or script error:", err);
         resultElement.textContent = "Error communicating with server.";
     }
 }
