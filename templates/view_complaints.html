@@ -100,13 +100,14 @@
                         <span><strong>📍 Location:</strong> {{ item.location | default('Not provided') }}</span>
                     </div>
                     <div class="complaint-text">
-                        <strong>Complaint:</strong> <span class="complaint-desc">{{ item.complaint | default('No description') }}</span>
+                        <strong>Complaint:</strong> {{ item.complaint | default('No description') }}
                     </div>
                     <div class="ai-result">
                         <strong>AI Analysis:</strong><br>
-                        <span class="ai-desc">{{ item.ai_result | default('No analysis available') }}</span>
+                        {{ item.ai_result | default('No analysis available') }}
                     </div>
-                    <button class="back-btn email-btn">
+                    <!-- Use data-index instead of inline Jinja in onclick -->
+                    <button class="back-btn email-btn" data-index="{{ loop.index0 }}">
                         ✉️ Email to Barangay Official
                     </button>
                 </div>
@@ -119,28 +120,31 @@
     <script>
     document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.email-btn').forEach(button => {
-            button.addEventListener('click', function() {
-                const card = this.closest('.complaint-card');
-                const location = card.querySelector('.meta-info span').textContent.replace('📍 Location:', '').trim();
-                const complaint = card.querySelector('.complaint-desc').textContent.trim();
-                const aiResult = card.querySelector('.ai-desc').textContent.trim();
-
-                const recipient = "yoomysigmaguy@gmail.com"; 
-                const subject = encodeURIComponent(`Barangay Complaint Report: ${complaint.substring(0, 30)}...`);
-                const body = encodeURIComponent(
-`Good day Barangay Official,
-
-A new community complaint has been logged through the reporting portal:
-
-- Complaint / Issue: ${complaint}
-- Location Coordinates: ${location}
-- AI Analysis & Suggested Action:
-${aiResult}
-
-Please review and action accordingly. Thank you!`
-                );
-
-                window.location.href = `mailto:${recipient}?subject=${subject}&body=${body}`;
+            button.addEventListener('click', async function() {
+                const index = this.getAttribute('data-index');
+                this.textContent = 'Sending email...';
+                this.disabled = true;
+                
+                try {
+                    const response = await fetch(`/send-report/${index}`, {
+                        method: 'POST'
+                    });
+                    const result = await response.json();
+                    
+                    if (response.ok) {
+                        this.textContent = '✅ Emailed Successfully!';
+                        this.style.borderColor = '#81c784';
+                        this.style.color = '#81c784';
+                    } else {
+                        alert('Failed to send: ' + result.message);
+                        this.textContent = '✉️ Email to Barangay Official';
+                        this.disabled = false;
+                    }
+                } catch (err) {
+                    alert('Network error occurred.');
+                    this.textContent = '✉️ Email to Barangay Official';
+                    this.disabled = false;
+                }
             });
         });
     });

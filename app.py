@@ -3,10 +3,13 @@ from google import genai
 from google.genai import types
 import json
 import os
+import resend
 
 app = Flask(__name__)
 
 client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
+resend.api_key = os.environ.get("RESEND_API_KEY")
+
 DB_FILE = "complaints.json"
 
 def save_to_file(complaint, result, location="Not provided"):
@@ -42,6 +45,45 @@ def view_complaints():
 def home():
     return render_template("index.html")
 
+@app.route("/send-report/<int:index>", methods=["POST"])
+def send_report(index):
+    data = []
+    if os.path.exists(DB_FILE):
+        with open(DB_FILE, 'r', encoding='utf-8') as f:
+            try:
+                data = json.load(f)
+            except json.JSONDecodeError:
+                data = []
+                
+    if 0 <= index < len(data):
+        item = data[index]
+        
+        recipient_email = "yoomysigmaguy@gmail.com" 
+        
+        html_body = f"""
+        <h3>New Community Complaint Report</h3>
+        <p><strong>Complaint / Issue:</strong> {item.get('complaint')}</p>
+        <p><strong>Location Coordinates:</strong> {item.get('location', 'Not provided')}</p>
+        <p><strong>AI Analysis & Suggested Action:</strong><br>
+        <pre>{item.get('ai_result')}</pre></p>
+        <p><em>Please review and action accordingly. Thank you!</em></p>
+        """
+        
+        try:
+            params = {
+                "from": "Report the Darkness <onboarding@resend.dev>",
+                "to": [recipient_email],
+                "subject": f"Barangay Complaint Report: {item.get('complaint', 'Issue')[:30]}",
+                "html": html_body
+            }
+            
+            email_response = resend.Emails.send(params)
+            return jsonify({"status": "success", "message": "Report emailed successfully!"})
+        except Exception as e:
+            return jsonify({"status": "error", "message": str(e)}), 500
+            
+    return jsonify({"status": "error", "message": "Complaint not found"}), 404
+
 @app.route("/complaint", methods=["POST"])
 def classify_complaint():
     lat = request.form.get("latitude")
@@ -54,7 +96,6 @@ def classify_complaint():
         
     location_str = f"{lat}, {lng}" if lat and lng and lat != "Unknown" else "Location not shared"
 
-    # 1. Handle Audio Files
     if 'audio' in request.files:
         audio_file = request.files['audio']
         audio_bytes = audio_file.read()
