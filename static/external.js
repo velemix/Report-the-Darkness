@@ -36,15 +36,15 @@ async function postToServer(formData, successMessage) {
             body: formData
         });
 
-        // Check if the server returned an error status (like 415, 500, 404)
+        
         const textResponse = await response.text();
         let result;
         try {
             result = JSON.parse(textResponse);
         } catch (e) {
-            // If it's not JSON, it's an HTML error page from Flask
+            
             console.error("Server HTML Error Response:", textResponse);
-            resultElement.textContent = `Server Error (${response.status}): Check terminal logs.`;
+            resultElement.textContent = `Server Error (${response.status}): Check Render logs.`;
             return;
         }
 
@@ -53,7 +53,14 @@ async function postToServer(formData, successMessage) {
             return;
         }
 
-        resultElement.textContent = result.result;
+        
+        resultElement.innerHTML = `
+            <div>${result.result}</div>
+            <br>
+            <a href="/view-complaints" style="color: #ffe66d; font-weight: bold; text-decoration: underline;">
+                📊 View Complaints Dashboard & Send to Official →
+            </a>
+        `;
     } catch (err) {
         console.error("Network or script error:", err);
         resultElement.textContent = "Error communicating with server.";

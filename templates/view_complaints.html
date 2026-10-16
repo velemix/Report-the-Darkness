@@ -40,6 +40,8 @@
             border-radius: 20px;
             font-size: 14px;
             transition: all 0.3s ease;
+            background: transparent;
+            cursor: pointer;
         }
         .back-btn:hover {
             background: rgba(255, 230, 109, 0.2);
@@ -73,6 +75,7 @@
             font-size: 14px;
             color: #d3d3d3;
             white-space: pre-wrap;
+            margin-bottom: 15px;
         }
         .empty-msg {
             text-align: center;
@@ -94,21 +97,58 @@
             {% for item in complaints %}
                 <div class="complaint-card">
                     <div class="meta-info">
-                        <span><strong>📍 Location:</strong> {{ item.location }}</span>
+                        <span><strong>📍 Location:</strong> {{ item.location | default('Not provided') }}</span>
                     </div>
                     <div class="complaint-text">
-                        <strong>Complaint:</strong> {{ item.complaint }}
+                        <strong>Complaint:</strong> {{ item.complaint | default('No description') }}
                     </div>
                     <div class="ai-result">
                         <strong>AI Analysis:</strong><br>
-                        {{ item.ai_result }}
+                        {{ item.ai_result | default('No analysis available') }}
                     </div>
+                    <!-- Use data-index instead of inline Jinja in onclick -->
+                    <button class="back-btn email-btn" data-index="{{ loop.index0 }}">
+                        ✉️ Email to Barangay Official
+                    </button>
                 </div>
             {% endfor %}
         {% else %}
             <div class="empty-msg">No complaints submitted yet.</div>
         {% endif %}
-    </div>
+    </div> 
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('.email-btn').forEach(button => {
+            button.addEventListener('click', async function() {
+                const index = this.getAttribute('data-index');
+                this.textContent = 'Sending email...';
+                this.disabled = true;
+                
+                try {
+                    const response = await fetch(`/send-report/${index}`, {
+                        method: 'POST'
+                    });
+                    const result = await response.json();
+                    
+                    if (response.ok) {
+                        this.textContent = '✅ Emailed Successfully!';
+                        this.style.borderColor = '#81c784';
+                        this.style.color = '#81c784';
+                    } else {
+                        alert('Failed to send: ' + result.message);
+                        this.textContent = '✉️ Email to Barangay Official';
+                        this.disabled = false;
+                    }
+                } catch (err) {
+                    alert('Network error occurred.');
+                    this.textContent = '✉️ Email to Barangay Official';
+                    this.disabled = false;
+                }
+            });
+        });
+    });
+    </script>
 
 </body>
 </html>

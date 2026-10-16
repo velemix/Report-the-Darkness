@@ -3,6 +3,9 @@ from google import genai
 from google.genai import types
 import json
 import os
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 app = Flask(__name__)
 
@@ -42,6 +45,56 @@ def view_complaints():
 def home():
     return render_template("index.html")
 
+@app.route("/send-report/<int:index>", methods=["POST"])
+def send_report(index):
+    data = []
+    if os.path.exists(DB_FILE):
+        with open(DB_FILE, 'r', encoding='utf-8') as f:
+            try:
+                data = json.load(f)
+            except json.JSONDecodeError:
+                data = []
+                
+    if 0 <= index < len(data):
+        item = data[index]
+        
+        # Configure your sender email and receiver barangay email
+        sender_email = os.environ.get("MAIL_USERNAME", "your_email@gmail.com")
+        sender_password = os.environ.get("MAIL_PASSWORD", "your_app_password")
+        receiver_email = "yoomysigmaguy@gmail.com" # Replace with actual barangay email
+        
+        msg = MIMEMultipart()
+        msg['From'] = sender_email
+        msg['To'] = receiver_email
+        msg['Subject'] = f"Barangay Complaint Report: {item.get('complaint', 'Issue')[:30]}"
+        
+        body = f"""
+        Good day Barangay Official,
+        
+        A new community complaint has been logged through the reporting portal:
+        
+        - Complaint / Issue: {item.get('complaint')}
+        - Location Coordinates: {item.get('location', 'Not provided')}
+        - AI Analysis & Suggested Action:
+        {item.get('ai_result')}
+        
+        Please review and action accordingly. Thank you!
+        """
+        
+        msg.attach(MIMEText(body, 'plain'))
+        
+        try:
+            server = smtplib.SMTP('smtp.gmail.com', 587)
+            server.starttls()
+            server.login(sender_email, sender_password)
+            server.sendmail(sender_email, receiver_email, msg.as_string())
+            server.quit()
+            return jsonify({"status": "success", "message": "Report emailed successfully!"})
+        except Exception as e:
+            return jsonify({"status": "error", "message": str(e)}), 500
+            
+    return jsonify({"status": "error", "message": "Complaint not found"}), 404
+
 @app.route("/complaint", methods=["POST"])
 def classify_complaint():
     lat = request.form.get("latitude")
@@ -64,7 +117,7 @@ def classify_complaint():
             
         try:
             response = client.models.generate_content(
-                model="gemini-3.8-flash",
+                model="gemini-1.5-flash",
                 contents=[
                     "Listen to this barangay complaint voice recording, transcribe it, and classify it.",
                     types.Part.from_bytes(data=audio_bytes, mime_type='audio/webm')
@@ -81,7 +134,6 @@ def classify_complaint():
             print(f"Audio processing error details: {e}")
             return jsonify({"result": f"Error processing audio: {str(e)}"}), 500
 
-        
     if 'file' in request.files:
         text_file = request.files['file']
         complaint_text = text_file.read().decode('utf-8')
@@ -93,7 +145,7 @@ def classify_complaint():
 
     try:
         response = client.models.generate_content(
-            model="gemini-3.8-flash",
+            model="gemini-1.5-flash",
             contents=f"""
 Classify this barangay complaint.
 
