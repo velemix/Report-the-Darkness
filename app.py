@@ -58,10 +58,10 @@ def send_report(index):
     if 0 <= index < len(data):
         item = data[index]
         
-        # Configure your sender email and receiver barangay email
+        # Pull email details from environment variables
         sender_email = os.environ.get("MAIL_USERNAME", "your_email@gmail.com")
         sender_password = os.environ.get("MAIL_PASSWORD", "your_app_password")
-        receiver_email = "yoomysigmaguy@gmail.com" # Replace with actual barangay email
+        receiver_email = "barangay.official@email.com" # Replace with actual barangay email
         
         msg = MIMEMultipart()
         msg['From'] = sender_email
@@ -117,7 +117,7 @@ def classify_complaint():
             
         try:
             response = client.models.generate_content(
-                model="gemini-1.5-flash",
+                model="gemini-3.8-flash",  # Changed back to gemini-3.8-flash
                 contents=[
                     "Listen to this barangay complaint voice recording, transcribe it, and classify it.",
                     types.Part.from_bytes(data=audio_bytes, mime_type='audio/webm')
@@ -145,7 +145,7 @@ def classify_complaint():
 
     try:
         response = client.models.generate_content(
-            model="gemini-1.5-flash",
+            model="gemini-3.8-flash",  # Changed back to gemini-3.8-flash
             contents=f"""
 Classify this barangay complaint.
 
