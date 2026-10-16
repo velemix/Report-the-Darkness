@@ -29,12 +29,14 @@ def save_to_file(complaint, result, location="Not provided"):
         
 @app.route('/view-complaints')
 def view_complaints():
-    try:
-        with open('complaints.json', 'r', encoding='utf-8') as f:
-            data = json.load(f)
-        return jsonify(data)
-    except FileNotFoundError:
-        return {"error": "No complaints file found yet."}, 404
+    data = []
+    if os.path.exists(DB_FILE):
+        with open(DB_FILE, 'r', encoding='utf-8') as f:
+            try:
+                data = json.load(f)
+            except json.JSONDecodeError:
+                data = []
+    return render_template('view_complaints.html', complaints=data)
 
 @app.route("/")
 def home():
@@ -79,7 +81,7 @@ def classify_complaint():
             print(f"Audio processing error details: {e}")
             return jsonify({"result": f"Error processing audio: {str(e)}"}), 500
 
-    
+        
     if 'file' in request.files:
         text_file = request.files['file']
         complaint_text = text_file.read().decode('utf-8')

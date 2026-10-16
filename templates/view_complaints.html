@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complaints Dashboard - Report the Darkness</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #161616;
+            color: #ffffff;
+            padding: 40px 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            border-bottom: 1px solid rgba(255, 230, 109, 0.2);
+            padding-bottom: 15px;
+        }
+        h1 {
+            font-size: 28px;
+            color: #ffe66d;
+        }
+        .back-btn {
+            color: #ffe66d;
+            text-decoration: none;
+            padding: 8px 16px;
+            border: 1px solid rgba(255, 230, 109, 0.4);
+            border-radius: 20px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        .back-btn:hover {
+            background: rgba(255, 230, 109, 0.2);
+        }
+        .complaint-card {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 230, 109, 0.15);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+        }
+        .meta-info {
+            font-size: 13px;
+            color: #ffe66d;
+            margin-bottom: 10px;
+            display: flex;
+            gap: 15px;
+        }
+        .complaint-text {
+            font-size: 15px;
+            margin-bottom: 15px;
+            color: #ffffff;
+            line-height: 1.5;
+        }
+        .ai-result {
+            background: rgba(0, 0, 0, 0.3);
+            border-left: 4px solid #ffe66d;
+            padding: 12px 15px;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #d3d3d3;
+            white-space: pre-wrap;
+        }
+        .empty-msg {
+            text-align: center;
+            color: #999;
+            margin-top: 50px;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>Submitted Complaints</h1>
+            <a href="/" class="back-btn">← Back to Home</a>
+        </header>
+
+        {% if complaints %}
+            {% for item in complaints %}
+                <div class="complaint-card">
+                    <div class="meta-info">
+                        <span><strong>📍 Location:</strong> {{ item.location }}</span>
+                    </div>
+                    <div class="complaint-text">
+                        <strong>Complaint:</strong> {{ item.complaint }}
+                    </div>
+                    <div class="ai-result">
+                        <strong>AI Analysis:</strong><br>
+                        {{ item.ai_result }}
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-msg">No complaints submitted yet.</div>
+        {% endif %}
+    </div>
+
+</body>
+</html>
